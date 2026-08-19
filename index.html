@@ -4,58 +4,69 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Калькулятор електрика</title>
-  <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: #172033; background: #eef3f8; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
-    .card { width: min(760px, 100%); background: white; border-radius: 20px; padding: 28px; box-shadow: 0 12px 35px rgba(20,40,70,.12); }
-    h1 { margin: 0 0 8px; font-size: clamp(26px, 5vw, 40px); }
-    .intro { margin: 0 0 24px; color: #5c6678; }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    label { display: block; font-weight: 650; }
-    input { width: 100%; margin-top: 7px; padding: 13px 14px; border: 1px solid #ccd5e1; border-radius: 10px; font-size: 17px; }
-    button { margin-top: 20px; width: 100%; border: 0; border-radius: 11px; padding: 14px; font-size: 17px; font-weight: 700; color: white; background: #1769e0; cursor: pointer; }
-    button:hover { background: #0f57bf; }
-    .result { margin-top: 22px; padding: 18px; border-radius: 13px; background: #f1f6ff; border-left: 5px solid #1769e0; }
-    .result strong { font-size: 24px; }
-    .hint { margin-top: 18px; color: #6b7483; font-size: 13px; }
-    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .card { padding: 20px; } }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="card">
-    <h1>⚡ Калькулятор електрика</h1>
-    <p class="intro">Швидкий розрахунок потужності, струму та опору.</p>
+    <header class="header">
+      <div class="logo">⚡</div>
+      <div>
+        <h1>Калькулятор електрика</h1>
+        <p>Швидкий розрахунок напруги, струму, опору та потужності.</p>
+      </div>
+    </header>
 
-    <section class="grid">
-      <label>Напруга U (В)
+    <section class="grid" aria-label="Параметри електричного кола">
+      <label>Напруга U <span>(В)</span>
         <input id="voltage" type="number" value="230" min="0" step="any">
       </label>
-      <label>Струм I (А)
+      <label>Струм I <span>(А)</span>
         <input id="current" type="number" value="10" min="0" step="any">
       </label>
-      <label>Опір R (Ω)
+      <label>Опір R <span>(Ω)</span>
         <input id="resistance" type="number" value="23" min="0" step="any">
       </label>
-      <label>Потужність P (Вт)
+      <label>Потужність P <span>(Вт)</span>
         <input id="power" type="number" value="2300" min="0" step="any">
       </label>
     </section>
 
-    <button id="calculate">Розрахувати</button>
+    <button id="calculate" type="button">⚡ Розрахувати</button>
+    <button id="clear" class="secondary" type="button">Очистити</button>
+
     <div class="result" id="result">Введіть будь-які два відомі параметри та натисніть «Розрахувати».</div>
-    <p class="hint">Формули: P = U × I, I = U / R, U = I × R. Результати є довідковими.</p>
+
+    <section class="formulas">
+      <h2>Основні формули</h2>
+      <div class="formula-list">
+        <span>P = U × I</span>
+        <span>U = I × R</span>
+        <span>I = U / R</span>
+      </div>
+    </section>
+
+    <p class="hint">Розрахунки є довідковими. Перед роботою з електроустановками дотримуйтесь правил електробезпеки.</p>
   </main>
 
   <script>
     const $ = id => document.getElementById(id);
-    function num(id) { const v = parseFloat($(id).value); return Number.isFinite(v) && v >= 0 ? v : null; }
-    function fmt(v) { return Number.isInteger(v) ? v : v.toFixed(2); }
+    function num(id) {
+      const value = parseFloat($(id).value);
+      return Number.isFinite(value) && value >= 0 ? value : null;
+    }
+    function fmt(value) {
+      if (value === null || !Number.isFinite(value)) return '—';
+      return Number.isInteger(value) ? value : value.toFixed(2);
+    }
 
     function calculate() {
       let U = num('voltage'), I = num('current'), R = num('resistance'), P = num('power');
       const known = [U, I, R, P].filter(v => v !== null).length;
-      if (known < 2) { $('result').textContent = 'Потрібно ввести щонайменше два параметри.'; return; }
+
+      if (known < 2) {
+        $('result').textContent = 'Потрібно ввести щонайменше два параметри.';
+        return;
+      }
 
       if (U !== null && I !== null) { P = U * I; R = I ? U / I : null; }
       else if (U !== null && R !== null) { I = R ? U / R : null; P = U * I; }
@@ -66,13 +77,24 @@
 
       if (U !== null) $('voltage').value = fmt(U);
       if (I !== null) $('current').value = fmt(I);
-      if (R !== null && Number.isFinite(R)) $('resistance').value = fmt(R);
-      if (P !== null && Number.isFinite(P)) $('power').value = fmt(P);
+      if (R !== null) $('resistance').value = fmt(R);
+      if (P !== null) $('power').value = fmt(P);
 
-      $('result').innerHTML = `<strong>P = ${fmt(P)} Вт</strong><br>U = ${fmt(U)} В · I = ${fmt(I)} А · R = ${fmt(R)} Ω`;
+      $('result').innerHTML = `<strong>P = ${fmt(P)} Вт</strong><br><small>U = ${fmt(U)} В · I = ${fmt(I)} А · R = ${fmt(R)} Ω</small>`;
     }
+
+    function clearFields() {
+      ['voltage', 'current', 'resistance', 'power'].forEach(id => $(id).value = '');
+      $('result').textContent = 'Поля очищено. Введіть будь-які два відомі параметри.';
+    }
+
     $('calculate').addEventListener('click', calculate);
-    document.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); }));
+    $('clear').addEventListener('click', clearFields);
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') calculate();
+      });
+    });
   </script>
 </body>
 </html>
