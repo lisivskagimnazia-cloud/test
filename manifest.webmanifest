@@ -1,0 +1,17 @@
+{
+  "name": "Помічник електрика",
+  "short_name": "Електрик",
+  "description": "Онлайн-калькулятори та посібники з електротехніки.",
+  "lang": "uk",
+  "start_url": "/test/",
+  "scope": "/test/",
+  "display": "standalone",
+  "theme_color": "#1769e0",
+  "background_color": "#f5f8fc",
+  "icons": [{
+    "src": "/test/assets/icons/logo.svg",
+    "sizes": "any",
+    "type": "image/svg+xml",
+    "purpose": "any maskable"
+  }]
+}
